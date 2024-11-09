@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="grid"></div>
+  <button id="next">Next generation</button>
+
+  <textarea id="code">return "hi";</textarea>
+  <button id="button">Run</button>
+  <pre id="output"></pre>
+
+  <script>
+    const gridSize = 20;
+    let grid = [];
+
+    function createGrid() {
+      const gridDiv = document.getElementById("grid")
+      gridDiv.style.display = "grid";
+      gridDiv.style.gridTemplateColumns = `repeat(${gridSize}, 20px)`;
+      gridDiv.style.gap = "2px";
+
+      for (let y = 0; y < gridSize; y++) {
+        grid[y] = [];
+        for (let x = 0; x < gridSize; x++) {
+          const checkbox = document.createElement("input")
+          checkbox.type = "checkbox"
+          checkbox.style.width = "20px"
+          checkbox.style.height = "20px"
+          checkbox.checked = Math.random() < 0.3;
+          grid[y][x] = checkbox;
+          gridDiv.appendChild(checkbox)
+        }
+      }
+    }
+
+    function countLiveNeighbors(x, y) {
+      let liveNeighbors = 0;
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          if (dx === 0 && dy === 0) continue
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) {
+            if (grid[ny][nx].checked) liveNeighbors++;
+          }
+        }
+      }
+      return liveNeighbors;
+    }
+
+    function nextGeneration() {
+      const newGrid = [];
+
+      for (let y = 0; y < gridSize; y++) {
+        newGrid[y] = [];
+        for (let x = 0; x < gridSize; x++) {
+          const isAlive = grid[y][x].checked;
+          const liveNeighbors = countLiveNeighbors(x, y)
+          if (isAlive) {
+            newGrid[y][x] = liveNeighbors === 2 || liveNeighbors === 3;
+          } else {
+            newGrid[y][x] = liveNeighbors === 3;
+          }
+        }
+      }
+
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          grid[y][x].checked = newGrid[y][x];
+        }
+      }
+    }
+
+    createGrid()
+    document.getElementById("next").addEventListener("click", nextGeneration)
+
+    document.getElementById("button").addEventListener("click", () => {
+      const code = document.getElementById("code").value;
+      const output = document.getElementById("output");
+      try {
+        const result = new Function(code)();
+        output.textContent = String(result);
+      } catch (error) {
+        output.textContent = "Error: " + error.toString();
+      }
+    });
+
+  </script>
+
+</body>
+
+</html>

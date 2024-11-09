@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balloon Game</title>
+    <style>
+        .trail {
+            position: absolute;
+            height: 6px;
+            width: 6px;
+            border-radius: 3px;
+            background: teal;
+        }
+
+        body {
+            height: 300px;
+        }
+
+        .tabs button {
+            padding: 10px;
+            margin: 0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            background-color: #f1f1f1;
+        }
+
+        .tabs button.active {
+            background-color: #ddd;
+            font-weight: bold;
+        }
+
+        .tab-content>div {
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <p id="balloon" style="font-size: 50px;">🎈</p>
+    <tab-panel>
+        <div data-tabname="one">Content for Tab One</div>
+        <div data-tabname="two">Content for Tab Two</div>
+        <div data-tabname="three">Content for Tab Three</div>
+    </tab-panel>
+    <script>
+        const balloon = document.getElementById("balloon")
+        let currentSize = 50
+        const maxSize = 220
+        function inflateBalloon(event) {
+            if (event.key === "ArrowUp") {
+                currentSize *= 1.1
+            } else if (event.key === "ArrowDown" && currentSize >= 50) {
+                currentSize *= 0.9
+            } else {
+                return;
+            }
+            balloon.style.fontSize = currentSize + "px"
+
+            if (currentSize > maxSize) {
+                balloon.textContent = "💥";
+                window.removeEventListener("keydown", inflateBalloon)
+            }
+            event.preventDefault()
+        }
+        window.addEventListener("keydown", inflateBalloon)
+
+        const trailLength = 10
+        let trail = []
+
+        for (let i = 0; i < trailLength; i++) {
+            const trailDot = document.createElement('div')
+            trailDot.classList.add('trail')
+            document.body.appendChild(trailDot)
+            trail.push(trailDot)
+        }
+
+        let trailIndex = 0
+        document.addEventListener('mousemove', (event) => {
+            const x = event.pageX
+            const y = event.pageY
+
+            const dot = trail[trailIndex]
+            dot.style.left = `${x - 3}px`
+            dot.style.top = `${y - 3}px`
+
+            trailIndex = (trailIndex + 1) % trailLength
+        })
+        function asTabs(node) {
+            const tabs = document.createElement("div")
+            tabs.classList.add("tabs")
+
+            const children = Array.from(node.children)
+            children.forEach((child, index) => {
+                const button = document.createElement("button")
+                button.textContent = child.getAttribute("data-tabname")
+
+                button.addEventListener("click", () => {
+                    children.forEach(tab => tab.style.display = "none")
+                    Array.from(tabs.children).forEach(btn => btn.classList.remove("active"))
+
+                    child.style.display = "";
+                    button.classList.add("active")
+                })
+
+                tabs.appendChild(button)
+            })
+
+
+            node.insertBefore(tabs, node.firstChild)
+            children.forEach((child, index) => child.style.display = "none")
+            children[0].style.display = ""
+            tabs.firstChild.classList.add("active")
+        }
+
+        asTabs(document.querySelector("tab-panel"))
+    </script>
+
+    </script>
+</body>
+
+</html>
